@@ -35,6 +35,7 @@ NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp){
 }
 
 void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long tempInterval){
+	_res = res;
 	_tempInterval = tempInterval;
 	_unitsOM = uom;
 	_currentState = notFound;
@@ -159,4 +160,20 @@ void NonBlockingDallas::requestTemperature(){
 		Serial.print("DS18B20: requested new reading");
 		Serial.println("");
 	#endif
+}
+
+void NonBlockingDallas::rescanWire(){
+	_dallasTemp->begin();
+	delay(50);
+	_dallasTemp->setWaitForConversion(false);	//Avoid blocking the CPU waiting for the sensors conversion
+	_sensorsCount = _dallasTemp->getDeviceCount();
+	_currentState = notFound;
+
+	if(_sensorsCount > 0){
+		_currentState = waitingNextReading;
+		_dallasTemp->setResolution((uint8_t)_res);
+		for(int i = 0; i < _sensorsCount; i++){
+			_dallasTemp->getAddress(_sensorAddresses[i], i);
+		}
+	}
 }

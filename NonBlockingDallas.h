@@ -50,6 +50,7 @@ public:
 	void begin(resolution res, unitsOfMeasure uom, unsigned long tempInterval);
 	void update();
 	void requestTemperature();
+	void rescanWire();
 	void onIntervalElapsed(void(*callback)(float temperature, bool valid, int deviceIndex)) {
 		cb_onIntervalElapsed = callback;
 	}
@@ -66,6 +67,7 @@ private:
 		readingSensor
 	};
 
+	resolution	_res;
 	DallasTemperature *_dallasTemp;
 	sensorState _currentState;
 	uint8_t _sensorsCount;					//Number of sensors found on the bus
