@@ -1,3 +1,7 @@
+[![arduino-library-badge](https://www.ardu-badge.com/badge/NonBlockingDallas.svg?)](https://www.ardu-badge.com/NonBlockingDallas)
+
+
+
 # Non blocking temperature sensor library for Arduino
 
 This simple library for Arduino implements a machine state for reading the **Maxim Integrated DS18B20 temperature sensor** without blocking the main loop() of the sketch. It is designed for a **continuos sensor reading** every amount of time configurable by the developer. It is also possible to request a new sensor reading on the fly by calling the *requestTemperature()* function.  
@@ -28,19 +32,7 @@ DS18B20 (2): 29.26 °C
 ...
 ```
 
-
-# Sensor Resolution
-
-The conversion time depends upon the resolution of the sensor, thus the **time interval** parameter passed to the *begin* function must be greater than or equal to the conversion time.
-
-| Resolution  | Conversion time |
-| ------------- | ------------- |
-| 9 bit  | 93 ms  |
-| 10 bit  | 187 ms  |
-| 11 bit  | 375 ms  |
-| 12 bit  | 750 ms  |
-
-# Callbacks
+### Callbacks
 
 The library is callback driven: *onIntervalElapsed* is invoked **every time** the timer interval is elapsed, *onTemperatureChange* is invoked **only when the temperature value changes** between two sensor readings.
 Both of them provide the temperature, a bool value which indicates wether the readout is valid and the sensor index from 0 to 14.
@@ -55,15 +47,38 @@ void onTemperatureChange(void(*callback)(float temperature, bool valid, int devi
 }
 ```
 
+
+# Sensor Resolution
+
+The conversion time of the DS18B20 temperature sensor depends on its resolution, thus the **time interval** parameter passed to the *begin* function must be greater than or equal to the conversion time.
+
+| Resolution  | Conversion time |
+| ------------- | ------------- |
+| 9 bit  | 93 ms  |
+| 10 bit  | 187 ms  |
+| 11 bit  | 375 ms  |
+| 12 bit  | 750 ms  |
+
+
 # Prerequisites
 
 This library uses OneWire and DallasTemperature libraries, so you will need to have those installed.
+
+
+# Installation
+
+The library is available from the Arduino Library Manager: load the Arduino IDE, then use the menu at the top to select Sketch -> Include Library -> Manage Libraries. Type **NonBlockingDallas** in the search box.
+
+Click the following badge for a complete installation guide
+
+[![arduino-library-badge](https://www.ardu-badge.com/badge/NonBlockingDallas.svg?)](https://www.ardu-badge.com/NonBlockingDallas)
+
 
 # Usage
 
 ### Step 1
 
-Include the required libreries:
+Include the required libraries:
 
 ```
 #include <OneWire.h>
