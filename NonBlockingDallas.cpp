@@ -41,17 +41,8 @@ NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp, unsigned cha
 
 NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp, unsigned char pin, String pathofsensornames)
 {
-    _gpiopin = pin;
-    _dallasTemp = dallasTemp;
-    _lastReadingMillis = 0;
-    _startConversionMillis = 0;
-    _conversionMillis = 0;
-    _currentState = notFound;
-    cb_onIntervalElapsed = NULL;
-    cb_onTemperatureChange = NULL;
+    NonBlockingDallas(dallasTemp,pin);
     _pathofsensornames = pathofsensornames;
-    _wireName = String("GPIO"); // Set default wire name
-    _wireName += String(_gpiopin);
 }
 
 void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long tempInterval)
@@ -112,7 +103,6 @@ void NonBlockingDallas::waitConversion()
             // Save the actual sensor conversion time to precisely calculate the next reading time
             _conversionMillis = millis() - _startConversionMillis;
             _currentState = readingSensor;
-            Serial.println(_conversionMillis);
         }
     }
 }
@@ -250,7 +240,7 @@ void NonBlockingDallas::rescanWire()
             {
             if (SPIFFS.exists(_pathofsensornames))
             { // Load sensor names
-                ENUM_NBD_ERROR err = NBD_NO_ERRROR;
+                ENUM_NBD_ERROR err = NBD_NO_ERROR;
                 setSensorNameByAddress(_sdv.at(i).sensorAddress,
                                        _sjsonp.getJSONValueByKeyFromFile(_pathofsensornames,
                                                                          addressToString(_sdv.at(i).sensorAddress)),
@@ -273,7 +263,7 @@ ENUM_NBD_ERROR NonBlockingDallas::getAddressByIndex(unsigned char index, DeviceA
     {
         address[i] = _sdv.at(index).sensorAddress[i];
     }
-    return NBD_NO_ERRROR;
+    return NBD_NO_ERROR;
 }
 
 const unsigned char NonBlockingDallas::getSensorsCount()
@@ -366,7 +356,7 @@ ENUM_NBD_ERROR NonBlockingDallas::getIndexBySensorName(String name, unsigned cha
         return NBD_NAME_NOT_FOUND;
     }
     index = std::distance(_sdv.begin(), it);
-    return NBD_NO_ERRROR;
+    return NBD_NO_ERROR;
 }
 
 String NonBlockingDallas::getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err)
@@ -381,10 +371,11 @@ String NonBlockingDallas::getSenorNameByIndex(unsigned char index, ENUM_NBD_ERRO
 
 bool NonBlockingDallas::setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err)
 {
-    bool found = true;
+    bool found;
     int p = -1;
     for (auto i = 0; i < getSensorsCount(); i++)
     {
+        found=true;
         for (auto t = 0; t < 8; t++)
         {
             if (_sdv.at(i).sensorAddress[t] != addr[t])
