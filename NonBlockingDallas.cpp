@@ -41,7 +41,16 @@ NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp, unsigned cha
 
 NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp, unsigned char pin, String pathofsensornames)
 {
-    NonBlockingDallas(dallasTemp,pin);
+    _gpiopin = pin;
+    _dallasTemp = dallasTemp;
+    _lastReadingMillis = 0;
+    _startConversionMillis = 0;
+    _conversionMillis = 0;
+    _currentState = notFound;
+    cb_onIntervalElapsed = NULL;
+    cb_onTemperatureChange = NULL;
+    _wireName = String("GPIO"); // Set default wire name
+    _wireName += String(_gpiopin);
     _pathofsensornames = pathofsensornames;
 }
 
