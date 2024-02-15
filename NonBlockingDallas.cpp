@@ -97,23 +97,21 @@ void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long 
 
 void NonBlockingDallas::waitNextReading()
 {
-    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
+    //if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
+    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval))
         return;
     requestTemperature();
 }
 
 void NonBlockingDallas::waitConversion()
 {
-
-    if (millis() - _startConversionMillis >= _conversionMillis-2)
-    {
         if (_dallasTemp->isConversionComplete())
         {
             // Save the actual sensor conversion time to precisely calculate the next reading time
             _conversionMillis = millis() - _startConversionMillis;
+            Serial.println("Conversion takes:"+String(_conversionMillis)+" ms");
             _currentState = readingSensor;
         }
-    }
 }
 
 void NonBlockingDallas::readSensors()
@@ -297,9 +295,9 @@ unsigned char NonBlockingDallas::getGPIO()
 
 float NonBlockingDallas::getTempByName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname = [&](const SensorData &sd)
+    auto compname2 = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname2);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
@@ -310,9 +308,9 @@ float NonBlockingDallas::getTempByName(String name, ENUM_NBD_ERROR &err)
 
 unsigned long NonBlockingDallas::getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname = [&](const SensorData &sd)
+    auto compname1 = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname1);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
@@ -344,9 +342,9 @@ bool NonBlockingDallas::setSenorNameByIndex(unsigned char index, String name, EN
 
 unsigned char NonBlockingDallas::getIndexBySensorName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname = [&](const SensorData &sd)
+    auto compname3 = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname3);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
@@ -357,9 +355,9 @@ unsigned char NonBlockingDallas::getIndexBySensorName(String name, ENUM_NBD_ERRO
 
 ENUM_NBD_ERROR NonBlockingDallas::getIndexBySensorName(String name, unsigned char &index)
 {
-    auto compname = [&](const SensorData &sd)
+    auto compname4 = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname4);
     if (it == _sdv.end())
     {
         return NBD_NAME_NOT_FOUND;
