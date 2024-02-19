@@ -97,8 +97,8 @@ void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long 
 
 void NonBlockingDallas::waitNextReading()
 {
-    //if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
-    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval))
+    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
+    //if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval))
         return;
     requestTemperature();
 }
