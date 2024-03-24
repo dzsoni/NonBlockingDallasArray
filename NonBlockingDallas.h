@@ -40,7 +40,7 @@
 #define _DS18B20_PL(a)
 #endif
 
-#define DEFAULT_INTERVAL 30000
+#define DEFAULT_INTERVAL 31000
 #define ONE_WIRE_MAX_DEV 15 //Maximum number of devices on the One wire bus
 
 struct SensorData
@@ -114,8 +114,7 @@ private:
     {
         notFound = 0,
         waitingNextReading,
-        waitingConversion,
-        readingSensor
+        waitingConversionAndRead,
     };
     SimpleJsonParser    _sjsonp;
     unsigned char       _gpiopin;
@@ -132,7 +131,7 @@ private:
     std::vector<SensorData> _sdv = std::vector<SensorData>(); //every sensors' data on this wire
 
     void waitNextReading();
-    void waitConversion();
+    void waitConversionAndRead();
     void readSensors();
     void readTemperatures(int deviceIndex);
     void (*cb_onIntervalElapsed)(float temperature, bool valid, String wname, unsigned char gpiopin,  int deviceIndex);

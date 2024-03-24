@@ -103,15 +103,15 @@ void NonBlockingDallas::waitNextReading()
     requestTemperature();
 }
 
-void NonBlockingDallas::waitConversion()
+void NonBlockingDallas::waitConversionAndRead()
 {
-        if (_dallasTemp->isConversionComplete())
-        {
-            // Save the actual sensor conversion time to precisely calculate the next reading time
-            _conversionMillis = millis() - _startConversionMillis;
-            Serial.println("Conversion takes:"+String(_conversionMillis)+" ms");
-            _currentState = readingSensor;
-        }
+    if (!_dallasTemp->isConversionComplete())
+        return;
+
+    // Save the actual sensor conversion time to precisely calculate the next reading time
+    _conversionMillis = millis() - _startConversionMillis;
+    Serial.println("Conversion takes:" + String(_conversionMillis) + " ms");
+    readSensors();
 }
 
 void NonBlockingDallas::readSensors()
@@ -207,18 +207,15 @@ void NonBlockingDallas::update()
     case waitingNextReading:
         waitNextReading();
         break;
-    case waitingConversion:
-        waitConversion();
-        break;
-    case readingSensor:
-        readSensors();
+    case waitingConversionAndRead:
+        waitConversionAndRead();
         break;
     }
 }
 
 void NonBlockingDallas::requestTemperature()
 {
-    _currentState = waitingConversion;
+    _currentState = waitingConversionAndRead;
     _startConversionMillis = millis();
     _dallasTemp->requestTemperatures(); // Requests a temperature conversion for all the sensors on the bus
 
