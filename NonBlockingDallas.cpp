@@ -49,18 +49,18 @@ NonBlockingDallas::NonBlockingDallas(DallasTemperature *dallasTemp, unsigned cha
     _currentState = notFound;
     cb_onIntervalElapsed = NULL;
     cb_onTemperatureChange = NULL;
-    _wireName = String("GPIO"); // Set default wire name
+    _wireName =  String("GPIO"); // Set default wire name
     _wireName += String(_gpiopin);
     _pathofsensornames = pathofsensornames;
 }
 
-void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long tempInterval)
+void NonBlockingDallas::begin(NBD_resolution res, NBD_unitsOfMeasure uom, unsigned long tempInterval)
 {
     _res = res;
     _tempInterval = tempInterval;
     _unitsOM = uom;
     _currentState = notFound;
-    _conversionMillis = 750 / (1 << (12 - (uint8_t)res)); // Rough calculation of sensors conversion time
+    _conversionMillis = DallasTemperature::millisToWaitForConversion(_res);
     rescanWire();
 
     if ((_tempInterval < _conversionMillis) || (_tempInterval > 4294967295UL))
@@ -95,10 +95,12 @@ void NonBlockingDallas::begin(resolution res, unitsOfMeasure uom, unsigned long 
 //                                  PRIVATE
 //==============================================================================================
 
+
+
 void NonBlockingDallas::waitNextReading()
 {
-    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
-    //if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval))
+    //if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval - _conversionMillis))
+    if (_lastReadingMillis != 0 && (millis() - _lastReadingMillis < _tempInterval))
         return;
     requestTemperature();
 }
@@ -163,7 +165,7 @@ void NonBlockingDallas::readSensors()
 
 void NonBlockingDallas::readTemperatures(int deviceIndex)
 {
-    float temp = DEVICE_DISCONNECTED_C;
+    float temp = (_unitsOM==unit_C) ? DEVICE_DISCONNECTED_C : DEVICE_DISCONNECTED_F;
     bool validReadout = false;
     switch (_unitsOM)
     {
@@ -225,11 +227,13 @@ void NonBlockingDallas::requestTemperature()
 
 void NonBlockingDallas::rescanWire()
 {
-    
     _dallasTemp->begin();
     delay(50);
     _dallasTemp->setWaitForConversion(false); // Avoid blocking the CPU waiting for the sensors conversion
     _currentState = notFound;
+    
+    std::vector<SensorData> tmpsdv;
+    tmpsdv.swap(_sdv);
     _sdv.clear();
 
     if (getSensorsCount() > 0)
@@ -237,20 +241,30 @@ void NonBlockingDallas::rescanWire()
         _currentState = waitingNextReading;
         _dallasTemp->setResolution((uint8_t)_res);
 
+        // fill the names from previous vector then from json file, if possible
         for (int i = 0; i < getSensorsCount(); i++)
         {
             _sdv.emplace_back();
-            if(_dallasTemp->getAddress(_sdv.at(i).sensorAddress, i))
+            if (_dallasTemp->getAddress(_sdv.at(i).sensorAddress, i))
             {
-            if (SPIFFS.exists(_pathofsensornames))
-            { // Load sensor names
-                ENUM_NBD_ERROR err = NBD_NO_ERROR;
-                setSensorNameByAddress(_sdv.at(i).sensorAddress,
-                                       _sjsonp.getJSONValueByKeyFromFile(_pathofsensornames,
-                                                                         addressToString(_sdv.at(i).sensorAddress)),
-                                       err);
-            }
-            //Serial.println(_sdv.at(i).sensorName);
+                for (int e = 0; e < tmpsdv.size(); e++)
+                {  //Compare the address
+                   for (size_t a = 0; a < 8; a++)
+                   {
+                    if(tmpsdv[e].sensorAddress[a]!=_sdv[i].sensorAddress[a]) goto jsonsearch;
+                   }
+                    _sdv[i].sensorName = tmpsdv[i].sensorName;
+                }
+jsonsearch:      //load from file if.. 
+                if (SPIFFS.exists(_pathofsensornames) && _sdv[i].sensorName=="")
+                    { // Load sensor names
+                        ENUM_NBD_ERROR err = NBD_NO_ERROR;
+                        setSensorNameByAddress(_sdv.at(i).sensorAddress,
+                                               _sjsonp.getJSONValueByKeyFromFile(_pathofsensornames,
+                                                                                 addressToString(_sdv.at(i).sensorAddress)),
+                                                                                err);
+                    }
+                
             }
         }
         _sdv.shrink_to_fit();
@@ -280,8 +294,9 @@ float NonBlockingDallas::getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err
     if (index >= getSensorsCount())
     {
         err = NBD_INDEX_IS_OUT_OF_RANGE;
-        return DEVICE_DISCONNECTED_C;
+        return (_unitsOM==unit_C) ? DEVICE_DISCONNECTED_C : DEVICE_DISCONNECTED_F;
     }
+    err=NBD_NO_ERROR;
     return _sdv.at(index).temperature;
 }
 
@@ -290,29 +305,32 @@ unsigned char NonBlockingDallas::getGPIO()
     return _gpiopin;
 }
 
+
 float NonBlockingDallas::getTempByName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname2 = [&](const SensorData &sd)
+    auto compareNames = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname2);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compareNames);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
-        return DEVICE_DISCONNECTED_C;
+        return (_unitsOM==unit_C) ? DEVICE_DISCONNECTED_C : DEVICE_DISCONNECTED_F;
     }
+    err=NBD_NO_ERROR;
     return it->temperature;
 }
 
 unsigned long NonBlockingDallas::getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname1 = [&](const SensorData &sd)
+    auto compareNames = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname1);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compareNames);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
-        return DEVICE_DISCONNECTED_C;
+        return (_unitsOM==unit_C) ? DEVICE_DISCONNECTED_C : DEVICE_DISCONNECTED_F;
     }
+    err=NBD_NO_ERROR;
     return it->lastTimeOfValidTemp;
 }
 
@@ -323,6 +341,7 @@ unsigned long NonBlockingDallas::getLastTimeOfValidTempByIndex(unsigned char ind
         err = NBD_INDEX_IS_OUT_OF_RANGE;
         return 0UL;
     }
+    err=NBD_NO_ERROR;
     return _sdv.at(index).lastTimeOfValidTemp;
 }
 
@@ -333,28 +352,30 @@ bool NonBlockingDallas::setSenorNameByIndex(unsigned char index, String name, EN
         err = NBD_INDEX_IS_OUT_OF_RANGE;
         return false;
     }
+     err=NBD_NO_ERROR;
     _sdv.at(index).sensorName = name;
     return true;
 }
 
 unsigned char NonBlockingDallas::getIndexBySensorName(String name, ENUM_NBD_ERROR &err)
 {
-    auto compname3 = [&](const SensorData &sd)
+    auto compareNames = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname3);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compareNames);
     if (it == _sdv.end())
     {
         err = NBD_NAME_NOT_FOUND;
         return 0;
     }
+    err=NBD_NO_ERROR;
     return (unsigned char)std::distance(_sdv.begin(), it);
 }
 
 ENUM_NBD_ERROR NonBlockingDallas::getIndexBySensorName(String name, unsigned char &index)
 {
-    auto compname4 = [&](const SensorData &sd)
+    auto compareNames = [&](const SensorData &sd)
     { return sd.sensorName == name; };
-    auto it = std::find_if(_sdv.begin(), _sdv.end(), compname4);
+    auto it = std::find_if(_sdv.begin(), _sdv.end(), compareNames);
     if (it == _sdv.end())
     {
         return NBD_NAME_NOT_FOUND;
@@ -370,14 +391,15 @@ String NonBlockingDallas::getSenorNameByIndex(unsigned char index, ENUM_NBD_ERRO
         err = NBD_INDEX_IS_OUT_OF_RANGE;
         return String("");
     }
+    err=NBD_NO_ERROR;
     return _sdv.at(index).sensorName;
 }
 
 bool NonBlockingDallas::setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err)
 {
     bool found;
-    int p = -1;
-    for (auto i = 0; i < getSensorsCount(); i++)
+    int i = 0;
+    for ( i ; i < getSensorsCount(); i++)
     {
         found=true;
         for (auto t = 0; t < 8; t++)
@@ -390,21 +412,13 @@ bool NonBlockingDallas::setSensorNameByAddress(const DeviceAddress addr, String 
         }
         if (found)
         {
-            p = i;
-            break;
+            _sdv.at(i).sensorName=name;
+            err=NBD_NO_ERROR;
+            return true;
         }
     }
-    if (!found)
-    {
-        err = NBD_ADDRESS_IS_NOT_FOUND;
-        return false;
-    }
-    else
-    {
-        if (setSenorNameByIndex(p, name, err))
-            return true;
-    }
-    return false; // musn't be here
+    err = NBD_ADDRESS_IS_NOT_FOUND;
+    return false;
 }
 
 String NonBlockingDallas::addressToString(DeviceAddress devaddress)
@@ -423,9 +437,69 @@ void NonBlockingDallas::setPathOfSensorNames(String path)
 {
     _pathofsensornames = path;
 }
-String NonBlockingDallas::getUnitsOfMeasure()
+
+void NonBlockingDallas::setUnitsOfMeasure(NBD_unitsOfMeasure unit)
 {
-    if (_unitsOM == unit_C)
-        return String("C");
-    return String("F");
+    _unitsOM=unit;
+}
+
+NonBlockingDallas::NBD_unitsOfMeasure NonBlockingDallas::getUnitsOfMeasure()
+{
+    return _unitsOM;
+}
+
+String NonBlockingDallas::getUnitsOfMeasureToString()
+{
+    return (_unitsOM==unit_C) ? "C" :"F";
+}
+
+String NonBlockingDallas::getWireName()
+{
+    return _wireName;
+}
+
+void NonBlockingDallas::setWireName(String wirename)
+{
+    _wireName = wirename;
+}
+
+/// @brief Save the "address - name" pair from SensorData vector (_sdv) to json file. 
+void NonBlockingDallas::saveSensorNames()
+{
+    if (_pathofsensornames != "")
+    {
+        String json = "{";
+        for (unsigned int i = 0; i < _sdv.size(); i++)
+        {
+            if (i != 0)
+                json += ",";
+            json += "\"";
+            json += addressToString(_sdv[i].sensorAddress);
+            json += "\":\"";
+            json += _sdv[i].sensorName;
+            json += "\"";
+        }
+        json += "}";
+
+        File file = SPIFFS.open(_pathofsensornames, "w");
+        if (!file)
+        {
+            _DS18B20_PL(F("Error opening file for writing"));
+            return;
+        }
+        _DS18B20_PL(json);
+        file.print(json);
+        file.flush();
+        file.close();
+    }
+}
+
+void NonBlockingDallas::setResolution(NBD_resolution res)
+{
+    _res=res;
+}
+
+NonBlockingDallas::NBD_resolution NonBlockingDallas::getResolution()
+{
+    return _res;
 }

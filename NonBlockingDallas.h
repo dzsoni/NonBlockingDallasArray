@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef NonBlockingDallas_h
-#define NonBlockingDallas_h
+#ifndef NONBLOCKINGDALLAS_H
+#define NONBLOCKINGDALLAS_H
 
 
 #include <Arduino.h>
@@ -52,53 +52,64 @@ struct SensorData
     String sensorName = "";                                 //Name of the sensor
 };
 
+
+
+
+
 class NonBlockingDallas
 {
-
 public:
-    String _wireName; //Name of the wire
-
-    enum resolution
+   enum NBD_resolution
     {
         resolution_9 = 9,
         resolution_10 = 10,
         resolution_11 = 11,
         resolution_12 = 12
     };
-
-    enum unitsOfMeasure
+   enum NBD_unitsOfMeasure
     {
         unit_C,
         unit_F
     };
-
     NonBlockingDallas(DallasTemperature *dallasTemp, unsigned char pin);
     NonBlockingDallas(DallasTemperature *dallasTemp, unsigned char pin, String pathofsensornames);
 
-    void begin(resolution res, unitsOfMeasure uom, unsigned long tempInterval);
-    void update();
-    void rescanWire();
-    void requestTemperature();
+    void                begin(NBD_resolution res, NBD_unitsOfMeasure uom, unsigned long tempInterval);
+    void                update();
+    void                rescanWire();
+    void                requestTemperature();
     const unsigned char getSensorsCount();
-    unsigned char getGPIO();
-    String getUnitsOfMeasure();
+    unsigned char       getGPIO();
+    void                setUnitsOfMeasure(NBD_unitsOfMeasure unit);
+    NBD_unitsOfMeasure  getUnitsOfMeasure();
+    String              getUnitsOfMeasureToString();//'C' or 'F'
 
-    String addressToString(DeviceAddress devaddress);
-    void  setPathOfSensorNames(String path);
-    float getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
-    float getTempByName(String name, ENUM_NBD_ERROR &err);
-    String getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+    String              getWireName();
+    void                setWireName(String wirename);
 
-    unsigned char getIndexBySensorName(String name, ENUM_NBD_ERROR &err);
-    ENUM_NBD_ERROR getIndexBySensorName(String name, unsigned char &index);
+    void                saveSensorNames();
 
-    ENUM_NBD_ERROR getAddressByIndex(unsigned char index, DeviceAddress& address);
+    void                setResolution(NBD_resolution res);
+    NBD_resolution      getResolution();
 
-    unsigned long getLastTimeOfValidTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
-    unsigned long getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err);
+    String              addressToString(DeviceAddress devaddress);
+    void                setPathOfSensorNames(String path);
+    
+    float               getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+    float               getTempByName(String name, ENUM_NBD_ERROR &err);
 
-    bool setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
-    bool setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);
+    String              getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+
+    unsigned char       getIndexBySensorName(String name, ENUM_NBD_ERROR &err);
+    ENUM_NBD_ERROR      getIndexBySensorName(String name, unsigned char &index);
+
+    ENUM_NBD_ERROR      getAddressByIndex(unsigned char index, DeviceAddress& address);
+
+    unsigned long       getLastTimeOfValidTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+    unsigned long       getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err);
+
+    bool                setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
+    bool                setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);
 
     void onIntervalElapsed(void (*callback)(float temperature, bool valid, String wname, unsigned char gpiopin, int deviceIndex))
     {
@@ -116,16 +127,17 @@ private:
         waitingNextReading,
         waitingConversionAndRead,
     };
+    String              _wireName; //Name of the wire
     SimpleJsonParser    _sjsonp;
     unsigned char       _gpiopin;
-    resolution          _res;
+    NBD_resolution      _res;
     DallasTemperature   *_dallasTemp;
     sensorState         _currentState;
     unsigned long       _lastReadingMillis;     //Time at last temperature sensor readout
     unsigned long       _startConversionMillis; //Time at start conversion of the sensor
-    unsigned long       _conversionMillis;     //Sensor conversion time based on the resolution [milliseconds]
+    unsigned long       _conversionMillis;      //Sensor conversion time based on the resolution [milliseconds]
     unsigned long       _tempInterval;          //Interval among each sensor reading [milliseconds]
-    unitsOfMeasure      _unitsOM;               //Unit of measurement
+    NBD_unitsOfMeasure  _unitsOM;               //Unit of measurement
     String _pathofsensornames;
 
     std::vector<SensorData> _sdv = std::vector<SensorData>(); //every sensors' data on this wire
@@ -137,4 +149,4 @@ private:
     void (*cb_onIntervalElapsed)(float temperature, bool valid, String wname, unsigned char gpiopin,  int deviceIndex);
     void (*cb_onTemperatureChange)(float temperature, bool valid, String wname, unsigned char gpiopin,  int deviceIndex);
 };
-#endif
+#endif /* NONBLOCKINGDALLAS_H */
