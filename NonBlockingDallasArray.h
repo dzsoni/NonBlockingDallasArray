@@ -3,7 +3,11 @@
 
 #include "NonBlockingDallas.h"
 #include <vector>
-
+/*
+The key purpose of the class is to group multiple NonBlockingDallas objects together
+and provide methods to interact with all of them collectively. This allows you to manage
+many temperature sensors over different wires efficiently.
+*/
 class NonBlockingDallasArray
 {
 private:
@@ -31,7 +35,7 @@ public:
 
     void                setUnitsOfMeasure(NonBlockingDallas::NBD_unitsOfMeasure unit);
     NonBlockingDallas::NBD_unitsOfMeasure  getUnitsOfMeasure();
-    String              getUnitsOfMeasureToString();//'C' or 'F'
+    String              getUnitsOfMeasureAsString();//'C' or 'F'
 
     unsigned char       getGPIO(unsigned char index,ENUM_NBD_ERROR &err);
 
@@ -49,7 +53,7 @@ public:
     ENUM_NBD_ERROR      getIndexBySensorName(String name, unsigned char &index);
 
     unsigned long       getLastTimeOfValidTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
-    unsigned long       getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err);
+    unsigned long       getLastTimeOfValidTempByName(const String& name, ENUM_NBD_ERROR &err);
 
     ENUM_NBD_ERROR      getAddressByIndex(unsigned char index, DeviceAddress &address);
 

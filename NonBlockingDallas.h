@@ -82,7 +82,7 @@ public:
     unsigned char       getGPIO();
     void                setUnitsOfMeasure(NBD_unitsOfMeasure unit);
     NBD_unitsOfMeasure  getUnitsOfMeasure();
-    String              getUnitsOfMeasureToString();//'C' or 'F'
+    String              getUnitsOfMeasureAsString();//'C' or 'F'
 
     String              getWireName();
     void                setWireName(String wirename);
@@ -106,7 +106,7 @@ public:
     ENUM_NBD_ERROR      getAddressByIndex(unsigned char index, DeviceAddress& address);
 
     unsigned long       getLastTimeOfValidTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
-    unsigned long       getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err);
+    unsigned long       getLastTimeOfValidTempByName(const String name, ENUM_NBD_ERROR &err);
 
     bool                setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
     bool                setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);

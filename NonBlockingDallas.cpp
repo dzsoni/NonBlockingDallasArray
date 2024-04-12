@@ -260,7 +260,7 @@ jsonsearch:      //load from file if..
                     { // Load sensor names
                         ENUM_NBD_ERROR err = NBD_NO_ERROR;
                         setSensorNameByAddress(_sdv.at(i).sensorAddress,
-                                               _sjsonp.getJSONValueByKeyFromFile(_pathofsensornames,
+                                               _sjsonp.getValueByKeyFromFile(_pathofsensornames,
                                                                                  addressToString(_sdv.at(i).sensorAddress)),
                                                                                 err);
                     }
@@ -320,7 +320,7 @@ float NonBlockingDallas::getTempByName(String name, ENUM_NBD_ERROR &err)
     return it->temperature;
 }
 
-unsigned long NonBlockingDallas::getLastTimeOfValidTempByName(String name, ENUM_NBD_ERROR &err)
+unsigned long NonBlockingDallas::getLastTimeOfValidTempByName(const String name, ENUM_NBD_ERROR &err)
 {
     auto compareNames = [&](const SensorData &sd)
     { return sd.sensorName == name; };
@@ -448,22 +448,40 @@ NonBlockingDallas::NBD_unitsOfMeasure NonBlockingDallas::getUnitsOfMeasure()
     return _unitsOM;
 }
 
-String NonBlockingDallas::getUnitsOfMeasureToString()
+String NonBlockingDallas::getUnitsOfMeasureAsString()
 {
     return (_unitsOM==unit_C) ? "C" :"F";
 }
 
+/**
+ * Returns the wire name for the NonBlockingDallas instance.
+ *
+ * @return the wire name
+ */
 String NonBlockingDallas::getWireName()
 {
     return _wireName;
 }
 
+/**
+ * Sets the wire name for the NonBlockingDallas object.
+ *
+ * @param wirename the new wire name to set
+ */
 void NonBlockingDallas::setWireName(String wirename)
 {
     _wireName = wirename;
 }
 
-/// @brief Save the "address - name" pair from SensorData vector (_sdv) to json file. 
+ 
+/**
+ * Saves the sensor names to a file. You should set the path of the file
+ * using setPathOfSensorNames before calling this method, or construct the NonBlockingDallas object with a path.
+ * Note: The file will be created if it doesn't exist, and won't be created if the path doesn't exist.
+ * @param None
+ *
+ * @return None
+ */
 void NonBlockingDallas::saveSensorNames()
 {
     if (_pathofsensornames != "")
@@ -494,11 +512,21 @@ void NonBlockingDallas::saveSensorNames()
     }
 }
 
+/**
+ * Set the resolution for NonBlockingDallas sensor.
+ *
+ * @param res the resolution to be set
+ */
 void NonBlockingDallas::setResolution(NBD_resolution res)
 {
     _res=res;
 }
 
+/**
+ * Get the resolution value from the NonBlockingDallas class.
+ *
+ * @return the resolution value
+ */
 NonBlockingDallas::NBD_resolution NonBlockingDallas::getResolution()
 {
     return _res;
