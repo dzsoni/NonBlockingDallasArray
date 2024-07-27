@@ -71,6 +71,7 @@ public:
     ENUM_NBD_ERROR      getAddressByIndex(unsigned char index, DeviceAddress &address);
 
     bool                setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);
+    String              getSensorNameByAddress(const DeviceAddress addr, ENUM_NBD_ERROR &err);
 
 };
 

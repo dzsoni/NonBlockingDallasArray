@@ -215,9 +215,17 @@ String NonBlockingDallasArray::getUnitsOfMeasureAsString()
     return (_unitsOM==NonBlockingDallas::NBD_unitsOfMeasure::unit_C) ? "C" :"F";
 }
 
-/// @brief Get gpiopin number for a sensor. Sensor selected by it's index.
-/// @param index 
-/// @return 
+
+/**
+ * Retrieves the GPIO pin number for a sensor selected by its index.
+ *
+ * @param indexofsensor The index of the sensor.
+ * @param err A reference to an ENUM_NBD_ERROR variable to store any errors that occur.
+ *
+ * @return The GPIO pin number of the sensor, or 0 if the index is out of range.
+ *
+ * @throws None
+ */
 unsigned char NonBlockingDallasArray::getGPIO(unsigned char indexofsensor,ENUM_NBD_ERROR &err)
 {
     unsigned int pointer=0;
@@ -542,6 +550,23 @@ bool NonBlockingDallasArray::setSensorNameByAddress(const DeviceAddress addr, St
     return false;
 }
 
+String NonBlockingDallasArray::getSensorNameByAddress(const DeviceAddress addr, ENUM_NBD_ERROR &err)
+{
+    err=NBD_NO_ERROR;
+    DeviceAddress addr2;
+    for(unsigned int i=0; i<getSensorsCount();i++)
+    {
+        if(getAddressByIndex(i,addr2)==NBD_NO_ERROR);
+        {
+            if(addr2[0]==addr[0] && addr2[1]==addr[1] && addr2[2]==addr[2] && addr2[3]==addr[3] && addr2[4]==addr[4] && addr2[5]==addr[5] && addr2[6]==addr[6] && addr2[7]==addr[7])
+            {
+                return getSenorNameByIndex((unsigned char)i,err);
+            }
+        }       
+    }
+    err = NBD_ADDRESS_IS_NOT_FOUND;
+    return String();
+}
 
 /**
  * Init all devices with same parameter.
