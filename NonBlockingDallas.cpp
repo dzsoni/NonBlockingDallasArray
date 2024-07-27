@@ -338,7 +338,7 @@ unsigned long NonBlockingDallas::getLastTimeOfValidTempByIndex(unsigned char ind
     return _sdv.at(index).lastTimeOfValidTemp;
 }
 
-bool NonBlockingDallas::setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err)
+bool NonBlockingDallas::setSensorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err)
 {
     if (index >= getSensorsCount())
     {
@@ -377,7 +377,7 @@ ENUM_NBD_ERROR NonBlockingDallas::getIndexBySensorName(String name, unsigned cha
     return NBD_NO_ERROR;
 }
 
-String NonBlockingDallas::getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err)
+String NonBlockingDallas::getSensorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err)
 {
     if (index >= getSensorsCount())
     {

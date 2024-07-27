@@ -9,6 +9,13 @@ NonBlockingDallasArray::~NonBlockingDallasArray()
 }
 
 
+/**
+ * Adds a NonBlockingDallas object to the NonBlockingDallasArray if it is not already present.
+ *
+ * @param NBDpt Pointer to the NonBlockingDallas object to be added.
+ *
+ * @throws None
+ */
 void NonBlockingDallasArray::addNonBlockingDallas(NonBlockingDallas *NBDpt)
 {
     if (NBDpt == nullptr)
@@ -114,7 +121,7 @@ void NonBlockingDallasArray::saveSensorNames()
                 _wires[e]->getAddressByIndex(e,address);
                 json += _wires[e]->addressToString(address);
                 json += "\":\"";
-                json += _wires[e]->getSenorNameByIndex(e,err);
+                json += _wires[e]->getSensorNameByIndex(e,err);
                 json += "\"";
             }
         }
@@ -344,7 +351,7 @@ float NonBlockingDallasArray::getTempByNameS(String name)
  *
  * @throws ENUM_NBD_ERROR if the index is out of range
  */
-String NonBlockingDallasArray::getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err)
+String NonBlockingDallasArray::getSensorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err)
 {
     unsigned int pointer =0;
     err=NBD_NO_ERROR;
@@ -352,7 +359,7 @@ String NonBlockingDallasArray::getSenorNameByIndex(unsigned char index, ENUM_NBD
     {
       if(pointer+_wires.at(i)->getSensorsCount()>index)
       {
-        return _wires.at(i)->getSenorNameByIndex(index-pointer,err);
+        return _wires.at(i)->getSensorNameByIndex(index-pointer,err);
       }
       else
       {
@@ -373,7 +380,7 @@ String NonBlockingDallasArray::getSenorNameByIndex(unsigned char index, ENUM_NBD
  * @return a boolean indicating if the operation was successful or not
  *
  */
-bool NonBlockingDallasArray::setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err)
+bool NonBlockingDallasArray::setSensorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err)
 {
     unsigned int pointer =0;
     err=NBD_NO_ERROR;
@@ -381,7 +388,7 @@ bool NonBlockingDallasArray::setSenorNameByIndex(unsigned char index, String nam
     {
       if(pointer+_wires.at(i)->getSensorsCount()>index)
       {
-        return _wires.at(i)->setSenorNameByIndex(index-pointer,name,err);
+        return _wires.at(i)->setSensorNameByIndex(index-pointer,name,err);
       }
       else
       {
@@ -537,7 +544,6 @@ ENUM_NBD_ERROR NonBlockingDallasArray::getAddressByIndex(unsigned char index, De
  */
 bool NonBlockingDallasArray::setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err)
 {
-    unsigned int pointer =0;
     err=NBD_NO_ERROR;
     for(unsigned int i=0; i<_wires.size();i++)
     {
@@ -556,11 +562,11 @@ String NonBlockingDallasArray::getSensorNameByAddress(const DeviceAddress addr, 
     DeviceAddress addr2;
     for(unsigned int i=0; i<getSensorsCount();i++)
     {
-        if(getAddressByIndex(i,addr2)==NBD_NO_ERROR);
+        if(getAddressByIndex(i,addr2)==NBD_NO_ERROR)
         {
             if(addr2[0]==addr[0] && addr2[1]==addr[1] && addr2[2]==addr[2] && addr2[3]==addr[3] && addr2[4]==addr[4] && addr2[5]==addr[5] && addr2[6]==addr[6] && addr2[7]==addr[7])
             {
-                return getSenorNameByIndex((unsigned char)i,err);
+                return getSensorNameByIndex((unsigned char)i,err);
             }
         }       
     }

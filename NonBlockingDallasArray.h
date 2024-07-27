@@ -59,8 +59,8 @@ public:
     float               getTempByName(String name, ENUM_NBD_ERROR &err);
     float               getTempByNameS(String name);
 
-    String              getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
-    bool                setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
+    String              getSensorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+    bool                setSensorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
 
     unsigned char       getIndexBySensorName(String name, ENUM_NBD_ERROR &err);
     ENUM_NBD_ERROR      getIndexBySensorName(String name, unsigned char &index);

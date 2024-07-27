@@ -98,7 +98,7 @@ public:
     float               getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
     float               getTempByName(String name, ENUM_NBD_ERROR &err);
 
-    String              getSenorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
+    String              getSensorNameByIndex(unsigned char index, ENUM_NBD_ERROR &err);
 
     unsigned char       getIndexBySensorName(String name, ENUM_NBD_ERROR &err);
     ENUM_NBD_ERROR      getIndexBySensorName(String name, unsigned char &index);
@@ -108,7 +108,7 @@ public:
     unsigned long       getLastTimeOfValidTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
     unsigned long       getLastTimeOfValidTempByName(const String name, ENUM_NBD_ERROR &err);
 
-    bool                setSenorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
+    bool                setSensorNameByIndex(unsigned char index, String name, ENUM_NBD_ERROR &err);
     bool                setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);
 
     void onIntervalElapsed(void (*callback)(float temperature, bool valid, String wname, unsigned char gpiopin, int deviceIndex))
