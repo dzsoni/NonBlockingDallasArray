@@ -3,6 +3,19 @@
 
 #include "NonBlockingDallas.h"
 #include <vector>
+
+
+//#define DEBUG_NBDARRAY                //comment out if you want debug output 
+
+#ifdef  DEBUG_NBDARRAY
+#define _NBDARRAY_PP(a) Serial.print(a);
+#define _NBDARRAY_PL(a) Serial.println(a);
+#else
+#define _NBDARRRY_PP(a)
+#define _NBDARRAY_PL(a)
+#endif
+
+
 /*
 The key purpose of the class is to group multiple NonBlockingDallas objects together
 and provide methods to interact with all of them collectively. This allows you to manage

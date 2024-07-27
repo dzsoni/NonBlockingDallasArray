@@ -8,8 +8,7 @@ NonBlockingDallasArray::~NonBlockingDallasArray()
 {
 }
 
-/// @brief Add a new NonBlockingDallas wire pointer to the array.  
-/// @param NonBlockingDallas* NBDpt
+
 void NonBlockingDallasArray::addNonBlockingDallas(NonBlockingDallas *NBDpt)
 {
     if (NBDpt == nullptr)
@@ -28,6 +27,14 @@ void NonBlockingDallasArray::addNonBlockingDallas(NonBlockingDallas *NBDpt)
     _wires.shrink_to_fit();
 }
 
+/**
+ * Updates all wires in the NonBlockingDallasArray.
+ *
+ * @param None
+ *
+ * @return void
+ *
+ */
 void NonBlockingDallasArray::update()
 {
    for (size_t i = 0; i < _wires.size(); i++)
@@ -36,14 +43,30 @@ void NonBlockingDallasArray::update()
     } 
 }
 
+/**
+ * Rescans all the wires in the NonBlockingDallasArray.
+ *
+ * @param None
+ *
+ * @return void
+ */
 void NonBlockingDallasArray::rescanWire()
 {
     for (size_t i = 0; i < _wires.size(); i++)
     {
+        _NBDARRAY_PL(String(__FUNCTION__) + ": Rescanning wire "+_wires[i]->getWireName());
         _wires[i]->rescanWire();
     }
 }
 
+/**
+ * Request temperature for all sensors on all wires.
+ *
+ * @param None
+ *
+ * @return void
+
+ */
 void NonBlockingDallasArray::requestTemperature()
 {
     for (size_t i = 0; i < _wires.size(); i++)
@@ -52,8 +75,12 @@ void NonBlockingDallasArray::requestTemperature()
     }
 }
 
-/// @brief Return the number of sensors on all wires.
-/// @return 
+
+/**
+ * Return the number of sensors on all wires.
+ *
+ * @return the total number of sensors
+ */
 const unsigned char NonBlockingDallasArray::getSensorsCount()
 {
     unsigned char result=0;
@@ -64,6 +91,12 @@ const unsigned char NonBlockingDallasArray::getSensorsCount()
     return result;
 }
 
+/**
+ * Save sensor names to a file in JSON format.
+ *
+ * @return void
+ *
+ */
 void NonBlockingDallasArray::saveSensorNames()
 {
      if (_pathofsensornames != "")
@@ -434,6 +467,15 @@ unsigned long NonBlockingDallasArray::getLastTimeOfValidTempByIndex(unsigned cha
     return 0;
 }
 
+/**
+ * A function to get the last time of valid temperature by name from a NonBlockingDallasArray.
+ *
+ * @param name the name of the sensor to retrieve the last time of valid temperature for
+ * @param err an ENUM_NBD_ERROR reference to store any potential errors
+ *
+ * @return the last time of valid temperature associated with the given sensor name
+ *
+ */
 unsigned long NonBlockingDallasArray::getLastTimeOfValidTempByName(const String& name, ENUM_NBD_ERROR &err)
 {
     ENUM_NBD_ERROR er;
@@ -451,6 +493,14 @@ unsigned long NonBlockingDallasArray::getLastTimeOfValidTempByName(const String&
     return temp;
 }
 
+/**
+ * Get the address by index in the NonBlockingDallasArray.
+ *
+ * @param index the index of the address to retrieve
+ * @param address reference to store the retrieved address
+ *
+ * @return an error code indicating the result of the operation
+ */
 ENUM_NBD_ERROR NonBlockingDallasArray::getAddressByIndex(unsigned char index, DeviceAddress &address)
 {
     unsigned int pointer=0;
@@ -467,6 +517,16 @@ ENUM_NBD_ERROR NonBlockingDallasArray::getAddressByIndex(unsigned char index, De
     return NBD_INDEX_IS_OUT_OF_RANGE;
 }
 
+/**
+ * Set the sensor name by address in the NonBlockingDallasArray.
+ *
+ * @param addr the address of the sensor
+ * @param name the name to set for the sensor
+ * @param err an ENUM_NBD_ERROR reference to store any error that occurs
+ *
+ * @return a boolean indicating if the operation was successful or not
+ *
+ */
 bool NonBlockingDallasArray::setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err)
 {
     unsigned int pointer =0;
@@ -482,10 +542,15 @@ bool NonBlockingDallasArray::setSensorNameByAddress(const DeviceAddress addr, St
     return false;
 }
 
-/// @brief Init all devices with same parameter.
-/// @param res resolution
-/// @param uom unitOfMeasure
-/// @param tempInterval Interval among each sensor reading [milliseconds]
+
+/**
+ * Init all devices with same parameter.
+ *
+ * @param res resolution
+ * @param uom unitOfMeasure
+ * @param tempInterval Interval among each sensor reading [milliseconds]
+ *
+ */
 void NonBlockingDallasArray::begin(NonBlockingDallas::NBD_resolution res, NonBlockingDallas::NBD_unitsOfMeasure uom, unsigned long tempInterval)
 {
     _res=res;

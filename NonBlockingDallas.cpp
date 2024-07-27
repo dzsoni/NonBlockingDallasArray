@@ -137,7 +137,7 @@ void NonBlockingDallas::readSensors()
             _DS18B20_PP(" °F ");
         }
         _DS18B20_PP("Family code:");
-#define ADR(a, i) sdv.at(i).sensorAddress[a]
+#define ADR(a, i) _sdv.at(i).sensorAddress[a]
         _DS18B20_PP(ADR(0, i));
         _DS18B20_PP(" ");
         _DS18B20_PP("Serial:")
@@ -221,54 +221,47 @@ void NonBlockingDallas::requestTemperature()
     _startConversionMillis = millis();
     _dallasTemp->requestTemperatures(); // Requests a temperature conversion for all the sensors on the bus
 
-    _DS18B20_PP(F("DS18B20: requested new reading"));
-    _DS18B20_PL("");
+    _DS18B20_PL(F("DS18B20: requested new reading."));
 }
 
 void NonBlockingDallas::rescanWire()
 {
     _dallasTemp->begin();
-    delay(50);
     _dallasTemp->setWaitForConversion(false); // Avoid blocking the CPU waiting for the sensors conversion
     _currentState = notFound;
     
-    std::vector<SensorData> tmpsdv;
-    tmpsdv.swap(_sdv);
+    DeviceAddress newaddress;
     _sdv.clear();
 
-    if (getSensorsCount() > 0)
-    {
-        _currentState = waitingNextReading;
-        _dallasTemp->setResolution((uint8_t)_res);
+    _currentState = waitingNextReading;
+    _dallasTemp->setResolution((uint8_t)_res);
 
-        // fill the names from previous vector then from json file, if possible
-        for (int i = 0; i < getSensorsCount(); i++)
+    _DS18B20_PL(String(__FUNCTION__)+" sensors count:"+String(getSensorsCount()));
+    
+    for (int i = 0; i < getSensorsCount(); i++)
+    {  
+        _sdv.emplace_back();
+        if (_dallasTemp->getAddress(&newaddress[0], i))
         {
-            _sdv.emplace_back();
-            if (_dallasTemp->getAddress(_sdv.at(i).sensorAddress, i))
+            for (size_t a = 0; a < 8; a++)
             {
-                for (int e = 0; e < tmpsdv.size(); e++)
-                {  //Compare the address
-                   for (size_t a = 0; a < 8; a++)
-                   {
-                    if(tmpsdv[e].sensorAddress[a]!=_sdv[i].sensorAddress[a]) goto jsonsearch;
-                   }
-                    _sdv[i].sensorName = tmpsdv[i].sensorName;
-                }
-jsonsearch:      //load from file if.. 
-                if (SPIFFS.exists(_pathofsensornames) && _sdv[i].sensorName=="")
-                    { // Load sensor names
-                        ENUM_NBD_ERROR err = NBD_NO_ERROR;
-                        setSensorNameByAddress(_sdv.at(i).sensorAddress,
-                                               _sjsonp.getValueByKeyFromFile(_pathofsensornames,
-                                                                                 addressToString(_sdv.at(i).sensorAddress)),
-                                                                                err);
-                    }
-                
+                _sdv.at(i).sensorAddress[a] = newaddress[a];
+            }
+            if(_pathofsensornames!= "")
+            {
+            ENUM_NBD_ERROR err = NBD_NO_ERROR;
+            setSensorNameByAddress(_sdv.at(i).sensorAddress,
+                                   _sjsonp.getValueByKeyFromFile(_pathofsensornames,
+                                                                 addressToString(_sdv.at(i).sensorAddress)),
+                                   err);
+            if(err!=NBD_NO_ERROR)
+            {
+             _DS18B20_PL(String(__FUNCTION__)+" Error setting sensor name by address: "+String(err));
+            }
             }
         }
-        _sdv.shrink_to_fit();
     }
+    _sdv.shrink_to_fit();
 }
 
 ENUM_NBD_ERROR NonBlockingDallas::getAddressByIndex(unsigned char index, DeviceAddress &address)
