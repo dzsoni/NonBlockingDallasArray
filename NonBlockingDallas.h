@@ -53,9 +53,6 @@ struct SensorData
 };
 
 
-
-
-
 class NonBlockingDallas
 {
 public:
@@ -83,6 +80,7 @@ public:
     void                setUnitsOfMeasure(NBD_unitsOfMeasure unit);
     NBD_unitsOfMeasure  getUnitsOfMeasure();
     String              getUnitsOfMeasureAsString();//'C' or 'F'
+    String              addressToString(DeviceAddress sensorAddress);
 
     String              getWireName();
     void                setWireName(String wirename);
@@ -92,7 +90,6 @@ public:
     void                setResolution(NBD_resolution res);
     NBD_resolution      getResolution();
 
-    String              addressToString(DeviceAddress devaddress);
     void                setPathOfSensorNames(String path);
     
     float               getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);

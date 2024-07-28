@@ -140,24 +140,19 @@ void NonBlockingDallasArray::saveSensorNames()
     }
 }
 
-/**
- * Convert a DeviceAddress to a String representation.
- *
- * @param devaddress The DeviceAddress to convert
- *
- * @return The String representation of the DeviceAddress
- */
-String NonBlockingDallasArray::addressToString(DeviceAddress devaddress)
+String NonBlockingDallasArray::addressToString(DeviceAddress sensorAddress)
 {
     String str = "";
     for (int i = 0; i < 8; i++)
     {
-        str += devaddress[i];
+        str += sensorAddress[i];
         if (i != 7)
             str += ".";
     }
     return str;
 }
+
+
 
 /**
  * Sets the resolution for the NonBlockingDallasArray object and propagates the resolution to all associated wires.
@@ -532,6 +527,24 @@ ENUM_NBD_ERROR NonBlockingDallasArray::getAddressByIndex(unsigned char index, De
     return NBD_INDEX_IS_OUT_OF_RANGE;
 }
 
+String NonBlockingDallasArray::getAddressByIndexS(unsigned char index)
+{
+    DeviceAddress address;
+    unsigned int pointer=0;
+    for(unsigned int i=0; i<_wires.size();i++)
+    {
+      if(pointer+_wires.at(i)->getSensorsCount()>index)
+      {
+        _wires.at(i)->getAddressByIndex(index-pointer,address);
+        return addressToString(address);
+      }
+      else{
+          pointer+=_wires.at(i)->getSensorsCount();
+      }
+    }
+    return String();
+}
+
 /**
  * Set the sensor name by address in the NonBlockingDallasArray.
  *
@@ -556,6 +569,16 @@ bool NonBlockingDallasArray::setSensorNameByAddress(const DeviceAddress addr, St
     return false;
 }
 
+/**
+ * Retrieves the name of a sensor in the NonBlockingDallasArray based on its address.
+ *
+ * @param addr The address of the sensor.
+ * @param err A reference to an ENUM_NBD_ERROR to store any error that occurs.
+ *
+ * @return The name of the sensor if found, otherwise an empty string.
+ *
+ * @throws None.
+ */
 String NonBlockingDallasArray::getSensorNameByAddress(const DeviceAddress addr, ENUM_NBD_ERROR &err)
 {
     err=NBD_NO_ERROR;
@@ -571,6 +594,23 @@ String NonBlockingDallasArray::getSensorNameByAddress(const DeviceAddress addr, 
         }       
     }
     err = NBD_ADDRESS_IS_NOT_FOUND;
+    return String();
+}
+
+String NonBlockingDallasArray::getSensorNameByAddressS(const DeviceAddress addr)
+{
+    ENUM_NBD_ERROR err;
+    DeviceAddress addr2;
+    for(unsigned int i=0; i<getSensorsCount();i++)
+    {
+        if(getAddressByIndex(i,addr2)==NBD_NO_ERROR)
+        {
+            if(addr2[0]==addr[0] && addr2[1]==addr[1] && addr2[2]==addr[2] && addr2[3]==addr[3] && addr2[4]==addr[4] && addr2[5]==addr[5] && addr2[6]==addr[6] && addr2[7]==addr[7])
+            {
+                return getSensorNameByIndex((unsigned char)i,err);
+            }
+        }       
+    }
     return String();
 }
 

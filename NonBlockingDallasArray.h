@@ -41,7 +41,7 @@ public:
     void                requestTemperature();
     const unsigned char getSensorsCount();
     void                saveSensorNames();
-    String              addressToString(DeviceAddress devaddress);
+    String              addressToString(DeviceAddress sensorAddress);
 
     void                setResolution(NonBlockingDallas::NBD_resolution res);
     NonBlockingDallas::NBD_resolution      getResolution();
@@ -69,9 +69,11 @@ public:
     unsigned long       getLastTimeOfValidTempByName(const String& name, ENUM_NBD_ERROR &err);
 
     ENUM_NBD_ERROR      getAddressByIndex(unsigned char index, DeviceAddress &address);
+    String              getAddressByIndexS(unsigned char index);
 
     bool                setSensorNameByAddress(const DeviceAddress addr, String name, ENUM_NBD_ERROR &err);
     String              getSensorNameByAddress(const DeviceAddress addr, ENUM_NBD_ERROR &err);
+    String              getSensorNameByAddressS(const DeviceAddress addr);
 
 };
 

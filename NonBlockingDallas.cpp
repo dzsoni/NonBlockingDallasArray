@@ -256,7 +256,7 @@ void NonBlockingDallas::rescanWire()
                                    err);
             if(err!=NBD_NO_ERROR)
             {
-             _DS18B20_PL(String(__FUNCTION__)+" Error setting sensor name by address: "+String(err));
+             _DS18B20_PL(String(__FUNCTION__)+" Error setting sensor name by address. NBD error code:"+String(err));
             }
             }
         }
@@ -414,17 +414,6 @@ bool NonBlockingDallas::setSensorNameByAddress(const DeviceAddress addr, String 
     return false;
 }
 
-String NonBlockingDallas::addressToString(DeviceAddress devaddress)
-{
-    String str = "";
-    for (int i = 0; i < 8; i++)
-    {
-        str += devaddress[i];
-        if (i != 7)
-            str += ".";
-    }
-    return str;
-}
 
 void NonBlockingDallas::setPathOfSensorNames(String path)
 {
@@ -444,6 +433,18 @@ NonBlockingDallas::NBD_unitsOfMeasure NonBlockingDallas::getUnitsOfMeasure()
 String NonBlockingDallas::getUnitsOfMeasureAsString()
 {
     return (_unitsOM==unit_C) ? "C" :"F";
+}
+
+String NonBlockingDallas::addressToString(DeviceAddress sensorAddress)
+{
+    String str = "";
+    for (int i = 0; i < 8; i++)
+    {
+        str += sensorAddress[i];
+        if (i != 7)
+            str += ".";
+    }
+    return str;
 }
 
 /**
