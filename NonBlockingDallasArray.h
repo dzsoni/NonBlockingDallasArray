@@ -53,7 +53,7 @@ public:
     unsigned char       getGPIO(unsigned char index,ENUM_NBD_ERROR &err);
 
     String              getWireName(unsigned char index);
-    void                setWireName(String wirename, unsigned char index);
+    void                setWireName(String wirename, unsigned char indexofwire);
 
     float               getTempByIndex(unsigned char index, ENUM_NBD_ERROR &err);
     float               getTempByName(String name, ENUM_NBD_ERROR &err);

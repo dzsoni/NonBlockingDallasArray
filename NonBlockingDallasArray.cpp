@@ -489,7 +489,7 @@ unsigned long NonBlockingDallasArray::getLastTimeOfValidTempByIndex(unsigned cha
 unsigned long NonBlockingDallasArray::getLastTimeOfValidTempByName(const String& name, ENUM_NBD_ERROR &err)
 {
     ENUM_NBD_ERROR er;
-    unsigned long temp;
+    unsigned long temp=DEVICE_DISCONNECTED_C;
     for(unsigned int i=0; i<_wires.size();i++)
     {
         er = NBD_NO_ERROR;

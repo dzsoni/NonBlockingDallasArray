@@ -256,7 +256,7 @@ void NonBlockingDallas::rescanWire()
                                    err);
             if(err!=NBD_NO_ERROR)
             {
-             _DS18B20_PL(String(__FUNCTION__)+" Error setting sensor name by address. NBD error code:"+String(err));
+             _DS18B20_PL(String(__FUNCTION__)+F(" Error setting sensor name by address. NBD error code:")+String(err));
             }
             }
         }
