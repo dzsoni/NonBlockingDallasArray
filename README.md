@@ -1,6 +1,3 @@
-[![arduino-library-badge](https://www.ardu-badge.com/badge/NonBlockingDallas.svg?)](https://www.ardu-badge.com/NonBlockingDallas)
-
-
 
 # Non blocking temperature sensor library for Arduino
 
